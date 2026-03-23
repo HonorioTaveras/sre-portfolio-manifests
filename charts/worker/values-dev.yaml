@@ -1,0 +1,12 @@
+# -----------------------------------------------------------------------------
+# values-dev.yaml -- Worker dev overrides
+# -----------------------------------------------------------------------------
+image:
+  repository: sre-portfolio-worker
+  tag: latest
+  pullPolicy: Never
+
+replicaCount: 1
+env: dev
+sqsQueueUrl: ""
+irsaRoleArn: ""

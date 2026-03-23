@@ -1,0 +1,11 @@
+# -----------------------------------------------------------------------------
+# values-prod.yaml -- Worker prod overrides
+# -----------------------------------------------------------------------------
+image:
+  repository: 167715593994.dkr.ecr.us-east-1.amazonaws.com/sre-portfolio-worker
+  tag: latest
+  pullPolicy: Always
+
+replicaCount: 1
+env: prod
+awsRegion: us-east-1

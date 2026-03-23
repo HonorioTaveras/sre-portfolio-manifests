@@ -1,0 +1,54 @@
+# -----------------------------------------------------------------------------
+# values.yaml -- Default Helm values for the Worker service
+# The worker has no HTTP ingress -- it only polls SQS internally.
+# It still exposes /health and /metrics endpoints for Kubernetes probes
+# and Prometheus scraping.
+# -----------------------------------------------------------------------------
+
+replicaCount: 1
+
+image:
+  repository: sre-portfolio-worker
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Service exposes /health and /metrics internally
+# No external traffic needed -- worker only polls SQS
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8001
+
+env: dev
+
+sqsQueueUrl: ""
+awsRegion: us-east-1
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8001
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  failureThreshold: 3
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8001
+  initialDelaySeconds: 15
+  periodSeconds: 20
+  failureThreshold: 3
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8001"
+  prometheus.io/path: "/metrics"

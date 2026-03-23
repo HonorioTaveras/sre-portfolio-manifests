@@ -1,0 +1,9 @@
+# -----------------------------------------------------------------------------
+# Chart.yaml -- Worker service chart metadata
+# -----------------------------------------------------------------------------
+apiVersion: v2
+name: sre-portfolio-worker
+description: SRE Portfolio Worker Service -- background job processor
+type: application
+version: 0.1.0
+appVersion: "latest"
