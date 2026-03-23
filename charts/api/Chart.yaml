@@ -1,0 +1,16 @@
+# -----------------------------------------------------------------------------
+# Chart.yaml -- Helm chart metadata
+# Describes the chart name, version, and what application it deploys.
+# appVersion should match the Docker image tag you're deploying.
+# Chart version increments when you change the chart itself.
+# -----------------------------------------------------------------------------
+apiVersion: v2
+name: sre-portfolio-api
+description: SRE Portfolio API Service -- FastAPI job submission and status API
+type: application
+
+# Chart version -- increment this when you change the chart templates
+version: 0.1.0
+
+# Application version -- updated by CI when a new image is built
+appVersion: "latest"
