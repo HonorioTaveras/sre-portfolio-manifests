@@ -1,0 +1,31 @@
+# -----------------------------------------------------------------------------
+# values-dev.yaml -- Dev environment overrides
+# Only contains values that differ from values.yaml defaults.
+# Helm merges this with values.yaml -- anything not here falls back to default.
+#
+# Key differences in dev:
+# - Image is built locally into Minikube (no ECR)
+# - Single replica (cost and resource saving)
+# - No IRSA role (Minikube doesn't support it)
+# - No OTel endpoint (tracing disabled locally)
+# -----------------------------------------------------------------------------
+
+image:
+  # For Minikube we build the image directly into the cluster
+  # so no registry URL is needed -- just the image name
+  repository: sre-portfolio-api
+  tag: latest
+  pullPolicy: Never   # Never pull -- use the locally built image in Minikube
+
+replicaCount: 1
+
+env: dev
+
+# SQS not available locally -- jobs created but not enqueued
+sqsQueueUrl: ""
+
+# Tracing disabled locally -- no OTel collector running
+otelEndpoint: ""
+
+# No IRSA on Minikube
+irsaRoleArn: ""

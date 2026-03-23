@@ -1,0 +1,28 @@
+# -----------------------------------------------------------------------------
+# service.yaml -- Kubernetes Service
+# A Service gives your Deployment a stable network identity inside the cluster.
+# Without a Service, pods are only reachable by their individual IP addresses
+# which change every time a pod restarts.
+# A Service provides a stable DNS name and load balances across all healthy pods.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: {{ .Release.Name }}-api
+spec:
+  # ClusterIP = only reachable inside the cluster
+  # Other types: NodePort (reachable from outside via node port)
+  #              LoadBalancer (provisions a cloud load balancer)
+  type: {{ .Values.service.type }}
+
+  selector:
+    # Routes traffic to pods with this label
+    # Must match the labels on the pod template in deployment.yaml
+    app: {{ .Release.Name }}-api
+
+  ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}          # Port the Service listens on
+      targetPort: {{ .Values.service.targetPort }} # Port on the container

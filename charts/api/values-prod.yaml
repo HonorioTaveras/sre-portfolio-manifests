@@ -1,0 +1,19 @@
+# -----------------------------------------------------------------------------
+# values-prod.yaml -- Production environment overrides
+# Points to ECR, runs multiple replicas, enables all observability.
+# Image tag is updated by the CI pipeline on every merge to main.
+# -----------------------------------------------------------------------------
+
+image:
+  repository: 167715593994.dkr.ecr.us-east-1.amazonaws.com/sre-portfolio-api
+  tag: latest    # CI pipeline updates this via sed on every deploy
+  pullPolicy: Always
+
+replicaCount: 2
+
+env: prod
+
+awsRegion: us-east-1
+
+# OTel collector service name inside the cluster
+otelEndpoint: "http://otel-collector:4317"

@@ -1,0 +1,107 @@
+# -----------------------------------------------------------------------------
+# deployment.yaml -- Kubernetes Deployment template
+# A Deployment tells Kubernetes: "run N copies of this container,
+# keep them running, and replace them this way when I update."
+# The {{ .Values.x }} syntax is Helm templating -- these get replaced
+# with actual values when you run helm install or helm upgrade.
+# -----------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-api
+  labels:
+    app: {{ .Release.Name }}-api
+    version: {{ .Values.image.tag }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+
+  # Rolling update strategy -- how Kubernetes replaces pods during an update
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1          # Allow 1 extra pod above desired count during update
+      maxUnavailable: 0    # Never go below desired count -- zero downtime
+
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-api
+
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-api
+        version: {{ .Values.image.tag }}
+        # Datadog unified service tagging -- links metrics, logs, and traces
+        tags.datadoghq.com/env:     {{ .Values.env }}
+        tags.datadoghq.com/service: {{ .Release.Name }}-api
+        tags.datadoghq.com/version: {{ .Values.image.tag }}
+      annotations:
+        # Prometheus pod autodiscovery -- scrapes /metrics on port 8000
+        prometheus.io/scrape: "true"
+        prometheus.io/port:   "8000"
+        prometheus.io/path:   "/metrics"
+    spec:
+      serviceAccountName: {{ .Release.Name }}-api
+
+      containers:
+        - name: api
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+
+          # Environment variables injected into the container at runtime
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-api-secrets
+                  key: database-url
+
+            - name: SQS_QUEUE_URL
+              value: {{ .Values.sqsQueueUrl | quote }}
+
+            - name: AWS_REGION
+              value: {{ .Values.awsRegion | quote }}
+
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: {{ .Values.otelEndpoint | quote }}
+
+            # Datadog agent host -- uses node IP so the pod reaches the
+            # DaemonSet agent running on the same node
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+
+            - name: DD_TRACE_AGENT_PORT
+              value: "8126"
+
+          # Readiness probe -- controls traffic routing
+          # Pod is removed from Service if this fails
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.readinessProbe.httpGet.path }}
+              port: {{ .Values.readinessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds }}
+            periodSeconds:       {{ .Values.readinessProbe.periodSeconds }}
+            failureThreshold:    {{ .Values.readinessProbe.failureThreshold }}
+
+          # Liveness probe -- controls pod restarts
+          # Pod is killed and restarted if this fails
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.httpGet.path }}
+              port: {{ .Values.livenessProbe.httpGet.port }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds }}
+            periodSeconds:       {{ .Values.livenessProbe.periodSeconds }}
+            failureThreshold:    {{ .Values.livenessProbe.failureThreshold }}
+
+          # Resource requests and limits
+          resources:
+            requests:
+              cpu:    {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu:    {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
