@@ -1,0 +1,71 @@
+# -----------------------------------------------------------------------------
+# values.yaml -- Default Helm values for the API service
+# These are the baseline values used across all environments.
+# Environment-specific files (values-dev.yaml, values-prod.yaml) override
+# specific values without duplicating everything.
+# -----------------------------------------------------------------------------
+
+# Number of pod replicas to run
+replicaCount: 1
+
+image:
+  # Repository is overridden per environment in values-dev.yaml
+  repository: sre-portfolio-api
+  # Tag is updated by the CI pipeline on every merge to main
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Service configuration -- exposes the deployment inside the cluster
+service:
+  type: ClusterIP   # Internal only -- LoadBalancer added via Ingress
+  port: 80          # External port the service listens on
+  targetPort: 8000  # Port the container listens on
+
+# Environment name -- used for labels and Datadog tagging
+env: dev
+
+# SQS queue URL -- overridden per environment
+sqsQueueUrl: ""
+
+# AWS region
+awsRegion: us-east-1
+
+# OTel collector endpoint -- empty means tracing disabled
+otelEndpoint: ""
+
+# Kubernetes resource requests and limits
+# Requests: what the pod is guaranteed
+# Limits: the maximum it can use before being throttled or OOMKilled
+resources:
+  requests:
+    cpu: "100m"      # 0.1 CPU cores
+    memory: "128Mi"  # 128 megabytes
+  limits:
+    cpu: "500m"      # 0.5 CPU cores
+    memory: "512Mi"  # 512 megabytes
+
+# Readiness probe -- Kubernetes removes the pod from service if this fails
+# New pods must pass this before receiving traffic during a rolling update
+readinessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 5   # Wait 5s after container starts before probing
+  periodSeconds: 10         # Check every 10 seconds
+  failureThreshold: 3       # Remove from service after 3 consecutive failures
+
+# Liveness probe -- Kubernetes restarts the pod if this fails
+# Catches cases where the app is running but completely stuck
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 15  # Give the app more time to start before liveness kicks in
+  periodSeconds: 20
+  failureThreshold: 3
+
+# Pod annotations -- Prometheus uses these to discover and scrape metrics
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
