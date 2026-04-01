@@ -17,6 +17,7 @@ spec:
     targetRevision: HEAD
     path: charts/worker
     helm:
+      releaseName: sre-portfolio-worker    # matches the original helm install
       valueFiles:
         - values.yaml
         - values-dev.yaml
