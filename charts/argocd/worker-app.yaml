@@ -1,0 +1,33 @@
+# -----------------------------------------------------------------------------
+# ArgoCD Application -- Worker Service
+# Same structure as the API application but points to the worker chart.
+# -----------------------------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sre-portfolio-worker
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/HonorioTaveras/sre-portfolio-manifests.git
+    targetRevision: HEAD
+    path: charts/worker
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: sre-portfolio
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

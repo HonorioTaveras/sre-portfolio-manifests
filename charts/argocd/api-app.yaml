@@ -1,0 +1,41 @@
+# -----------------------------------------------------------------------------
+# ArgoCD Application -- API Service
+# This tells ArgoCD where to find the Helm chart and where to deploy it.
+# ArgoCD watches the source repo and syncs the cluster when changes are detected.
+#
+# Key concepts:
+# - source: where the Helm chart lives (your manifests repo)
+# - destination: which cluster and namespace to deploy to
+# - syncPolicy: automated = ArgoCD syncs automatically on Git changes
+#               selfHeal = ArgoCD reverts manual cluster changes back to Git state
+# -----------------------------------------------------------------------------
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: sre-portfolio-api
+  namespace: argocd
+  # Finalizer ensures ArgoCD cleans up resources when the Application is deleted
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/HonorioTaveras/sre-portfolio-manifests.git
+    targetRevision: HEAD
+    path: charts/api
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-dev.yaml
+
+  destination:
+    server: https://kubernetes.default.svc  # The local cluster ArgoCD is running in
+    namespace: sre-portfolio
+
+  syncPolicy:
+    automated:
+      prune: true      # Delete resources that are removed from Git
+      selfHeal: true   # Revert manual changes back to Git state
+    syncOptions:
+      - CreateNamespace=true
