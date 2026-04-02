@@ -25,7 +25,7 @@ spec:
     targetRevision: HEAD
     path: charts/api
     helm:
-      releaseName: sre-portfolio    # explicitly set release name
+      releaseName: sre-portfolio-api    # explicitly set release name
       valueFiles:
         - values.yaml
         - values-dev.yaml

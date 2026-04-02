@@ -8,9 +8,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-worker
+  name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-worker
+    app: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -20,20 +20,20 @@ spec:
       maxUnavailable: 0
   selector:
     matchLabels:
-      app: {{ .Release.Name }}-worker
+      app: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ .Release.Name }}-worker
+        app: {{ .Release.Name }}
         tags.datadoghq.com/env:     {{ .Values.env }}
-        tags.datadoghq.com/service: {{ .Release.Name }}-worker
+        tags.datadoghq.com/service: {{ .Release.Name }}
         tags.datadoghq.com/version: {{ .Values.image.tag }}
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port:   "8001"
         prometheus.io/path:   "/metrics"
     spec:
-      serviceAccountName: {{ .Release.Name }}-worker
+      serviceAccountName: {{ .Release.Name }}
       containers:
         - name: worker
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -44,7 +44,7 @@ spec:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-worker-secrets
+                  name: {{ .Release.Name }}-secrets
                   key: database-url
 
             - name: SQS_QUEUE_URL
@@ -63,7 +63,7 @@ spec:
               value: "8126"
 
             - name: DD_SERVICE
-              value: {{ .Release.Name }}-worker
+              value: {{ .Release.Name }}
 
             - name: DD_ENV
               value: {{ .Values.env }}

@@ -8,9 +8,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-api
+  name: {{ .Release.Name }}
   labels:
-    app: {{ .Release.Name }}-api
+    app: {{ .Release.Name }}
 spec:
   # ClusterIP = only reachable inside the cluster
   # Other types: NodePort (reachable from outside via node port)
@@ -20,7 +20,7 @@ spec:
   selector:
     # Routes traffic to pods with this label
     # Must match the labels on the pod template in deployment.yaml
-    app: {{ .Release.Name }}-api
+    app: {{ .Release.Name }}
 
   ports:
     - protocol: TCP
