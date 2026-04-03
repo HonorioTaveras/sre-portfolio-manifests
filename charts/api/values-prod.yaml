@@ -6,7 +6,7 @@
 
 image:
   repository: 167715593994.dkr.ecr.us-east-1.amazonaws.com/sre-portfolio-api
-  tag: latest    # CI pipeline updates this via sed on every deploy
+  tag: 
   pullPolicy: Always
 
 replicaCount: 2
