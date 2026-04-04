@@ -23,6 +23,7 @@ spec:
     app: {{ .Release.Name }}
 
   ports:
-    - protocol: TCP
+    - name: http
+      protocol: TCP
       port: {{ .Values.service.port }}          # Port the Service listens on
       targetPort: {{ .Values.service.targetPort }} # Port on the container

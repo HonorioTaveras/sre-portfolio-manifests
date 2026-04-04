@@ -1,0 +1,49 @@
+# -----------------------------------------------------------------------------
+# ServiceMonitor -- tells Prometheus Operator to scrape our app services
+# The Prometheus Operator watches for ServiceMonitor resources and
+# automatically configures Prometheus scrape targets based on them.
+# No manual prometheus.yml editing needed.
+# -----------------------------------------------------------------------------
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sre-portfolio
+  namespace: monitoring
+  labels:
+    # This label tells the Prometheus Operator which Prometheus instance
+    # should pick up this ServiceMonitor
+    release: prometheus
+spec:
+  # Which namespaces to look for services in
+  namespaceSelector:
+    matchNames:
+      - sre-portfolio
+
+  # Which services to scrape -- matches services with this label
+  selector:
+    matchLabels:
+      app: sre-portfolio-api
+
+  endpoints:
+    - port: http        # The named port on the service to scrape
+      path: /metrics    # The metrics endpoint path
+      interval: 15s     # Scrape every 15 seconds
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sre-portfolio-worker
+  namespace: monitoring
+  labels:
+    release: prometheus
+spec:
+  namespaceSelector:
+    matchNames:
+      - sre-portfolio
+  selector:
+    matchLabels:
+      app: sre-portfolio-worker
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
