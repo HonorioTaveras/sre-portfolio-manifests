@@ -1,0 +1,92 @@
+# -----------------------------------------------------------------------------
+# OTel Collector -- receives traces from app services and forwards to Tempo
+# Acts as a telemetry pipeline middleman:
+# App -> OTel Collector -> Tempo (storage) -> Grafana (visualization)
+#
+# Using the contrib distribution which includes more exporters/receivers
+# than the core distribution.
+# -----------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317   # Receives traces from apps via gRPC
+          http:
+            endpoint: 0.0.0.0:4318   # Receives traces from apps via HTTP
+
+    processors:
+      batch:
+        # Batch spans together before exporting -- more efficient than
+        # sending one span at a time
+        timeout: 1s
+        send_batch_size: 1024
+
+    exporters:
+      otlp:
+        endpoint: http://tempo:3100   # Forward traces to Tempo
+        tls:
+          insecure: true              # No TLS for internal cluster traffic
+
+      debug:
+        verbosity: basic             # Log basic info about received traces
+
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [batch]
+          exporters: [otlp, debug]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.96.0
+          args:
+            - --config=/etc/otel/config.yaml
+          ports:
+            - containerPort: 4317   # gRPC
+            - containerPort: 4318   # HTTP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otel
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: monitoring
+spec:
+  selector:
+    app: otel-collector
+  ports:
+    - name: grpc
+      port: 4317
+      targetPort: 4317
+    - name: http
+      port: 4318
+      targetPort: 4318

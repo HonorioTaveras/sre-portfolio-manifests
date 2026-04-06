@@ -24,8 +24,8 @@ env: dev
 # SQS not available locally -- jobs created but not enqueued
 sqsQueueUrl: ""
 
-# Tracing disabled locally -- no OTel collector running
-otelEndpoint: ""
+# OTel collector service -- in monitoring namespace
+otelEndpoint: "http://otel-collector.monitoring.svc.cluster.local:4317"
 
 # No IRSA on Minikube
 irsaRoleArn: ""
