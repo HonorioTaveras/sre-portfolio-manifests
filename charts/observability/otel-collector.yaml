@@ -30,12 +30,12 @@ data:
 
     exporters:
       otlp:
-        endpoint: http://tempo:3100   # Forward traces to Tempo
+        endpoint: http://tempo:4317
         tls:
-          insecure: true              # No TLS for internal cluster traffic
+          insecure: true
 
       debug:
-        verbosity: basic             # Log basic info about received traces
+        verbosity: detailed
 
     service:
       pipelines:
