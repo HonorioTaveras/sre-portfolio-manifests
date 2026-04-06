@@ -14,7 +14,7 @@ image:
   # For Minikube we build the image directly into the cluster
   # so no registry URL is needed -- just the image name
   repository: sre-portfolio-api
-  tag: f5495010
+  tag: 7e006247
   pullPolicy: Never   # Never pull -- use the locally built image in Minikube
 
 replicaCount: 1
