@@ -34,6 +34,11 @@ data:
         tls:
           insecure: true
 
+      datadog:
+        api:
+          site: us5.datadoghq.com
+          key: "a550ba875951913ab4aa340002a316a3"
+
       debug:
         verbosity: detailed
 
@@ -42,7 +47,7 @@ data:
         traces:
           receivers: [otlp]
           processors: [batch]
-          exporters: [otlp, debug]
+          exporters: [otlp, datadog, debug]
 ---
 apiVersion: apps/v1
 kind: Deployment
