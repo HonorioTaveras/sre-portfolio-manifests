@@ -1,0 +1,45 @@
+# -----------------------------------------------------------------------------
+# Datadog Agent Helm Values
+# Deploys the Datadog Agent as a DaemonSet -- one pod per node.
+# The Agent collects metrics, traces (APM), and logs from all pods
+# on the node and ships them to Datadog.
+# -----------------------------------------------------------------------------
+datadog:
+  site: "us5.datadoghq.com"
+  clusterName: "sre-portfolio-minikube"
+  apiKeyExistingSecret: "datadog-secret"
+
+  # APM -- receives traces from application pods
+  apm:
+    portEnabled: true
+    port: 8126
+
+  # Process monitoring -- shows running processes in Datadog UI
+  processAgent:
+    enabled: true
+    processCollection: true
+
+  # Cluster-level checks
+  clusterChecks:
+    enabled: true
+
+  # Shows Kubernetes resources in Datadog UI
+  orchestratorExplorer:
+    enabled: true
+
+  # Tag all metrics/traces/logs with environment
+  tags:
+    - "env:dev"
+    - "project:sre-portfolio"
+
+  # Kubernetes state metrics
+  kubeStateMetricsEnabled: true
+
+# Cluster Agent -- aggregates cluster-level metrics
+clusterAgent:
+  enabled: true
+  replicas: 1
+
+# Deploy as DaemonSet -- one Agent pod per node
+agents:
+  enabled: true
