@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 image:
   repository: sre-portfolio-worker
-  tag: ac69fbf8
+  tag: f1f56cb2
   pullPolicy: Never
 
 replicaCount: 1
